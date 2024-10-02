@@ -4,15 +4,11 @@ const { userServices } = require("../services");
 const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
 
-const createUser = async (req, res, next) => {
-    try {
-        logger.debug("CREATE USER");
-        const user = await userServices.createUser(req.body);
-        res.status(httpStatus.CREATED).send(user);
-    } catch (error) {
-        next(error);
-    }
-};
+const createUser = catchAsync(async (req, res, next) => {
+    logger.debug("CREATE USER");
+    const user = await userServices.createUser(req.body);
+    res.status(httpStatus.CREATED).send(user);
+});
 
 const getUser = catchAsync(async (req, res) => {
     logger.debug("GET USER");

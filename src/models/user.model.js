@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 const { roles } = require("../config/roles");
 
 const userSchema = mongoose.Schema(
@@ -43,6 +44,9 @@ const userSchema = mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        refreshToken: {
+            type: String,
+        },
     },
     { timestamps: true }
 );
@@ -51,6 +55,19 @@ userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
     const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
     return !!user;
 };
+
+userSchema.methods.isPasswordMatch = async function (password) {
+    const user = this;
+    return bcrypt.compare(password, user.password);
+};
+
+userSchema.pre("save", async function (next) {
+    const user = this;
+    if (user.isModified("password")) {
+        user.password = bcrypt.hash(user.password, 10);
+    }
+    next();
+});
 
 const User = mongoose.model("User", userSchema);
 

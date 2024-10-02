@@ -17,6 +17,18 @@ const environmentVariablesSchema = Joi.object()
             .required()
             .description("Mongo DB cluster"),
         MONGODB_DB: Joi.string().required().description("Mongo DB database"),
+        ACCESS_TOKEN_SECRET: Joi.string()
+            .required()
+            .description("Access token JWT secret key"),
+        REFRESH_TOKEN_SECRET: Joi.string()
+            .required()
+            .description("Refresh token JWT secret key"),
+        ACCESS_EXPIRATION_MINUTES: Joi.number()
+            .required()
+            .description("Minutes after which Access Token expires"),
+        REFRESH_EXPIRATION_DAYS: Joi.number()
+            .required()
+            .description("Days after which Refresh Token expires"),
     })
     .prefs({ errors: { label: "key" } })
     .unknown();
@@ -36,5 +48,11 @@ module.exports = {
     mongoose: {
         url: mongoDbUrl,
         options: {}, //mongoose 6+ has defaults (useCreateIndex, useNewUrlParser, useUnifiedTopology)
+    },
+    jwt: {
+        accessTokenSecret: environmentVariables.ACCESS_TOKEN_SECRET,
+        refreshTokenSecret: environmentVariables.REFRESH_TOKEN_SECRET,
+        accessExpirationMinutes: environmentVariables.ACCESS_EXPIRATION_MINUTES,
+        refreshExpirationDays: environmentVariables.REFRESH_EXPIRATION_DAYS,
     },
 };
