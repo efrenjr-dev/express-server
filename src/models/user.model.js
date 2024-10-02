@@ -47,8 +47,8 @@ const userSchema = mongoose.Schema(
     { timestamps: true }
 );
 
-userSchema.statics.isEmailTaken = async function (email) {
-    const user = await this.findOne({ email });
+userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
+    const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
     return !!user;
 };
 

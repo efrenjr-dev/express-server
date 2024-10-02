@@ -11,10 +11,20 @@ const createUser = Joi.object({
         .regex(/[a-zA-Z]/, "at least 1 number"),
 });
 
-const getUser = Joi.object({
+const paramsUserId = Joi.object({
     userId: Joi.string()
         .required()
         .regex(/^[0-9a-fA-F]{24}$/, "object Id"),
 });
 
-module.exports = { createUser, getUser };
+const updateUser = Joi.object({
+    name: Joi.string(),
+    email: Joi.string().email(),
+    password: Joi.string()
+        .min(8)
+        .max(25)
+        .regex(/\d/, "at least 1 letter")
+        .regex(/[a-zA-Z]/, "at least 1 number"),
+});
+
+module.exports = { createUser, paramsUserId, updateUser };

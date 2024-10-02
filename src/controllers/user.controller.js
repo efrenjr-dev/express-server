@@ -14,7 +14,7 @@ const createUser = async (req, res, next) => {
     }
 };
 
-const getUser = catchAsync(async (req, res, next) => {
+const getUser = catchAsync(async (req, res) => {
     logger.debug("GET USER");
     const user = await userServices.getUserById(req.params.userId);
     if (!user) {
@@ -23,4 +23,25 @@ const getUser = catchAsync(async (req, res, next) => {
     res.status(httpStatus.FOUND).send(user);
 });
 
-module.exports = { createUser, getUser };
+const getAllUsers = catchAsync(async (req, res) => {
+    logger.debug("GET ALL USERS");
+    const users = await userServices.getAllUsers();
+    if (!users) {
+        throw new ApiError(httpStatus.NOT_FOUND, "No users found");
+    }
+    res.status(httpStatus.FOUND).send(users);
+});
+
+const updateUser = catchAsync(async (req, res) => {
+    logger.debug("UPDATE USER");
+    const user = await userServices.updateUser(req.params.userId, req.body);
+    if (!user) {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            "Unable to update user record"
+        );
+    }
+    res.status(httpStatus.ACCEPTED).send(user);
+});
+
+module.exports = { createUser, getUser, getAllUsers, updateUser };
