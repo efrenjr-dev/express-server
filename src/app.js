@@ -7,6 +7,7 @@ const { xss } = require("express-xss-sanitizer");
 const mongoSanitize = require("express-mongo-sanitize");
 const compression = require("compression");
 const cookieParser = require("cookie-parser");
+const passport = require("passport");
 
 const ApiError = require("./utils/ApiError");
 const { errorConverter, errorHandler } = require("./middlewares/error");
@@ -36,7 +37,6 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(passport.initialize());
 app.use(xss());
 app.use(mongoSanitize());
 app.use(compression());

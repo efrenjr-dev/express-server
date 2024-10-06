@@ -9,6 +9,7 @@ const createUser = Joi.object({
         .required()
         .regex(/\d/, "at least 1 letter")
         .regex(/[a-zA-Z]/, "at least 1 number"),
+    role: Joi.string().required().valid("user", "admin"),
 });
 
 const paramsUserId = Joi.object({
