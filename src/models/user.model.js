@@ -51,11 +51,22 @@ const userSchema = mongoose.Schema(
     { timestamps: true }
 );
 
+/**
+ *
+ * @param {string} email
+ * @param {string} excludeUserId
+ * @returns {boolean}
+ */
 userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
     const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
     return !!user;
 };
 
+/**
+ *
+ * @param {string} password
+ * @returns {boolean}
+ */
 userSchema.methods.isPasswordMatch = async function (password) {
     const user = this;
     return bcrypt.compare(password, user.password);
@@ -69,6 +80,9 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
+/**
+ * @typedef {Object} User
+ */
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
