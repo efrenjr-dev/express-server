@@ -1,4 +1,5 @@
 const express = require("express");
+const { auth } = require("../../middlewares/auth");
 const { userController } = require("../../controllers/");
 const { userValidation } = require("../../validations");
 const validator = require("express-joi-validation").createValidator({
@@ -9,7 +10,7 @@ const router = express.Router();
 
 router
     .route("/")
-    .get(userController.getAllUsers)
+    .get(auth("getUsers"), userController.getAllUsers)
     .post(validator.body(userValidation.createUser), userController.createUser);
 
 router

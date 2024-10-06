@@ -13,7 +13,13 @@ const register = catchAsync(async (req, res, next) => {
 
 const login = catchAsync(async (req, res, next) => {
     logger.debug("LOGIN USER");
-    res.status(httpStatus.OK).send("Logged In");
+    const { email, password } = req.body;
+    const user = await authServices.loginUserWithEmailAndPassword(
+        email,
+        password
+    );
+    const tokens = authServices.generateAuthTokens(user);
+    res.status(httpStatus.OK).send({ user, tokens });
 });
 
 module.exports = { register, login };

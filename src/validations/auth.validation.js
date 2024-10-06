@@ -7,8 +7,18 @@ const register = Joi.object({
         .min(8)
         .max(25)
         .required()
-        .regex(/\d/, "at least 1 letter")
-        .regex(/[a-zA-Z]/, "at least 1 number"),
+        .regex(/\d/, "at least 1 number required")
+        .regex(/[a-zA-Z]/, "at least 1 letter required"),
 });
 
-module.exports = { register };
+const login = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string()
+        .min(8)
+        .max(25)
+        .required()
+        .regex(/\d/, "at least 1 number required")
+        .regex(/[a-zA-Z]/, "at least 1 letter required"),
+});
+
+module.exports = { register, login };

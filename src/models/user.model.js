@@ -64,7 +64,7 @@ userSchema.methods.isPasswordMatch = async function (password) {
 userSchema.pre("save", async function (next) {
     const user = this;
     if (user.isModified("password")) {
-        user.password = bcrypt.hash(user.password, 10);
+        user.password = await bcrypt.hash(user.password, 10);
     }
     next();
 });
