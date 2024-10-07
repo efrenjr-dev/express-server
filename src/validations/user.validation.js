@@ -27,6 +27,7 @@ const updateUser = Joi.object({
         .regex(/\d/, "at least 1 letter")
         .regex(/[a-zA-Z]/, "at least 1 number"),
     role: Joi.string().valid("user", "admin"),
+    isActive: Joi.boolean(),
 });
 
 module.exports = { createUser, paramsUserId, updateUser };

@@ -45,8 +45,9 @@ const userSchema = mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        refreshToken: {
-            type: String,
+        isActive: {
+            type: Boolean,
+            default: true,
         },
     },
     { timestamps: true }
