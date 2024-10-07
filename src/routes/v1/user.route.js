@@ -24,7 +24,8 @@ router
         validator.params(userValidation.paramsUserId),
         userController.getUser
     )
-    .put(
+    .patch(
+        auth("manageUsers"),
         validator.params(userValidation.paramsUserId),
         validator.body(userValidation.updateUser),
         userController.updateUser
