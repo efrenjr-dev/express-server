@@ -1,18 +1,18 @@
 const httpStatus = require("http-status");
 const logger = require("../config/logger");
-const { userServices } = require("../services");
+const { userService } = require("../services");
 const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
 
 const createUser = catchAsync(async (req, res, next) => {
     logger.debug("CREATE USER");
-    const user = await userServices.createUser(req.body);
+    const user = await userService.createUser(req.body);
     res.status(httpStatus.CREATED).send(user);
 });
 
 const getUser = catchAsync(async (req, res) => {
     logger.debug("GET USER");
-    const user = await userServices.getUserById(req.params.userId);
+    const user = await userService.getUserById(req.params.userId);
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
@@ -21,7 +21,7 @@ const getUser = catchAsync(async (req, res) => {
 
 const getAllUsers = catchAsync(async (req, res) => {
     logger.debug("GET ALL USERS");
-    const users = await userServices.getAllUsers();
+    const users = await userService.getAllUsers();
     if (!users) {
         throw new ApiError(httpStatus.NOT_FOUND, "No users found");
     }
@@ -30,7 +30,7 @@ const getAllUsers = catchAsync(async (req, res) => {
 
 const updateUser = catchAsync(async (req, res) => {
     logger.debug("UPDATE USER");
-    const user = await userServices.updateUser(req.params.userId, req.body);
+    const user = await userService.updateUser(req.params.userId, req.body);
     if (!user) {
         throw new ApiError(
             httpStatus.BAD_REQUEST,

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const config = require("../config/config");
 const { roles } = require("../config/roles");
 
 const userSchema = mongoose.Schema(
@@ -75,7 +76,7 @@ userSchema.methods.isPasswordMatch = async function (password) {
 userSchema.pre("save", async function (next) {
     const user = this;
     if (user.isModified("password")) {
-        user.password = await bcrypt.hash(user.password, 10);
+        user.password = await bcrypt.hash(user.password, config.salt);
     }
     next();
 });

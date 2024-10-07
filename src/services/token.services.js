@@ -1,5 +1,6 @@
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
+const crypto = require("node:crypto");
 const config = require("../config/config");
 const logger = require("../config/logger");
 const { tokenTypes } = require("../config/tokens");
@@ -15,7 +16,8 @@ const Token = require("../models/token.model");
 const generateToken = (userId, expirationClaim, type, secret = "") => {
     if (type === tokenTypes.ACCESS) {
         secret = config.jwt.accessTokenSecret;
-    } else if (type === tokenTypes.REFRESH) {
+    }
+    if (type === tokenTypes.REFRESH) {
         secret = config.jwt.refreshTokenSecret;
     }
     const payload = {
@@ -30,14 +32,48 @@ const generateToken = (userId, expirationClaim, type, secret = "") => {
 const saveToken = async (token, userId, type, expirationClaim) => {
     const tokenDoc = await Token.create({
         token,
-        userId,
+        user: userId,
         expires: expirationClaim.toDate(),
         type,
     });
     return tokenDoc;
 };
 
-//verifyToken
+const blacklistToken = async (token) => {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const tokenUpdate = await Token.updateOne(
+        {
+            token: hashedToken,
+            blacklisted: false,
+        },
+        { $set: { blacklisted: true } }
+    );
+    if (!tokenUpdate.acknowledged) {
+        throw new Error("Token not updated");
+    }
+    return tokenUpdate.acknowledged;
+};
+
+const verifyToken = async (token, type, secret = "") => {
+    if (type === tokenTypes.ACCESS) {
+        secret = config.jwt.accessTokenSecret;
+    }
+    if (type === tokenTypes.REFRESH) {
+        secret = config.jwt.refreshTokenSecret;
+    }
+    const payload = jwt.verify(token, secret);
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const tokenDoc = await Token.findOne({
+        token: hashedToken,
+        user: payload.sub,
+        type: type,
+        blacklisted: false,
+    });
+    if (!tokenDoc) {
+        throw new Error("Token not found");
+    }
+    return tokenDoc;
+};
 
 const generateAuthTokens = async (user) => {
     const accessExpiry = moment().add(
@@ -56,14 +92,10 @@ const generateAuthTokens = async (user) => {
         tokenTypes.REFRESH
     );
 
-    const tokenDoc = await saveToken(
-        refreshToken,
-        user.id,
-        tokenTypes.REFRESH,
-        refreshExpiry
-    );
-    logger.debug(`tokenDoc: ${tokenDoc}`);
+    await saveToken(refreshToken, user.id, tokenTypes.REFRESH, refreshExpiry);
 
+    // logger.debug(`ACCESS TOKEN: ${accessToken}`);
+    // logger.debug(`REFRESH TOKEN: ${refreshToken}`);
     return {
         access: {
             token: accessToken,
@@ -76,4 +108,4 @@ const generateAuthTokens = async (user) => {
     };
 };
 
-module.exports = { generateAuthTokens };
+module.exports = { generateAuthTokens, verifyToken, blacklistToken };

@@ -7,8 +7,8 @@ const httpStatus = require("http-status");
 const verify =
     (req, resolve, reject, requiredRights) => async (err, user, info) => {
         if (err || info || !user) {
-            logger.debug(`Error: ${err}`);
-            logger.debug(`Info: ${info}`);
+            // logger.debug(`Error: ${err}`);
+            // logger.debug(`Info: ${info}`);
             return reject(
                 new ApiError(
                     httpStatus.UNAUTHORIZED,
@@ -16,7 +16,7 @@ const verify =
                 )
             );
         }
-        logger.debug(`User: ${user}`);
+        logger.debug(`User role: ${user.role}`);
         req.user = user;
 
         if (requiredRights.length) {

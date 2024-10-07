@@ -9,6 +9,7 @@ const environmentVariablesSchema = Joi.object()
             .valid("production", "development", "test")
             .required(),
         PORT: Joi.number().default(3000),
+        SALT: Joi.number().required(),
         MONGODB_USER: Joi.string().required().description("Mongo DB username"),
         MONGODB_PASSWORD: Joi.string()
             .required()
@@ -29,6 +30,24 @@ const environmentVariablesSchema = Joi.object()
         REFRESH_EXPIRATION_DAYS: Joi.number()
             .required()
             .description("Days after which Refresh Token expires"),
+        RATE_LIMIT_WINDOW_MINUTES: Joi.number()
+            .required()
+            .description("Minutes after which rate limit restarts"),
+        RATE_LIMIT_MAX_REQUESTS: Joi.number()
+            .required()
+            .description("Maximum requests within window"),
+        RATE_LIMIT_SKIP_SUCCESSFUL_REQUESTS: Joi.boolean()
+            .required()
+            .description("To skip limit count of successful requests"),
+        SLOW_DOWN_WINDOW_MINUTES: Joi.number()
+            .required()
+            .description("Minutes after which slow down limit restarts"),
+        SLOW_DOWN_DELAY_AFTER: Joi.number()
+            .required()
+            .description("Number of requests before slow down"),
+        SLOW_DOWN_DELAY_MS: Joi.number()
+            .required()
+            .description("Milliseconds of request delay"),
     })
     .prefs({ errors: { label: "key" } })
     .unknown();
@@ -45,6 +64,7 @@ const mongoDbUrl = `mongodb+srv://${environmentVariables.MONGODB_USER}:${environ
 module.exports = {
     env: environmentVariables.NODE_ENV,
     port: environmentVariables.PORT,
+    salt: environmentVariables.SALT,
     mongoose: {
         url: mongoDbUrl,
         options: {}, //mongoose 6+ has defaults (useCreateIndex, useNewUrlParser, useUnifiedTopology)
@@ -54,5 +74,16 @@ module.exports = {
         refreshTokenSecret: environmentVariables.REFRESH_TOKEN_SECRET,
         accessExpirationMinutes: environmentVariables.ACCESS_EXPIRATION_MINUTES,
         refreshExpirationDays: environmentVariables.REFRESH_EXPIRATION_DAYS,
+    },
+    rateLimit: {
+        windowMinutes: environmentVariables.RATE_LIMIT_WINDOW_MINUTES,
+        maxRequests: environmentVariables.RATE_LIMIT_MAX_REQUESTS,
+        skipSuccessfulRequests:
+            environmentVariables.RATE_LIMIT_SKIP_SUCCESSFUL_REQUESTS,
+    },
+    slowDown: {
+        windowMinutes: environmentVariables.SLOW_DOWN_WINDOW_MINUTES,
+        delayAfter: environmentVariables.SLOW_DOWN_DELAY_AFTER,
+        delayMilliseconds: environmentVariables.SLOW_DOWN_DELAY_MS,
     },
 };

@@ -18,6 +18,6 @@ router.post(
     validator.body(authValidation.login),
     authController.login
 );
-router.get("/refresh");
+router.post("/refresh", authController.refreshTokens);
 
 module.exports = router;

@@ -4,7 +4,7 @@ const logger = require("../config/logger");
 const config = require("../config/config");
 
 const errorConverter = (err, req, res, next) => {
-    logger.debug(`ApiError: ${err instanceof ApiError}`);
+    // logger.debug(`ApiError: ${err instanceof ApiError}`);
     let error = err;
     if (!(error instanceof ApiError)) {
         const statusCode = error.statusCode;

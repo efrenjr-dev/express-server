@@ -11,11 +11,19 @@ const router = express.Router();
 router
     .route("/")
     .get(auth("getUsers"), userController.getAllUsers)
-    .post(validator.body(userValidation.createUser), userController.createUser);
+    .post(
+        auth("manageUsers"),
+        validator.body(userValidation.createUser),
+        userController.createUser
+    );
 
 router
     .route("/:userId")
-    .get(validator.params(userValidation.paramsUserId), userController.getUser)
+    .get(
+        auth("getUsers"),
+        validator.params(userValidation.paramsUserId),
+        userController.getUser
+    )
     .put(
         validator.params(userValidation.paramsUserId),
         validator.body(userValidation.updateUser),

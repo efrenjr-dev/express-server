@@ -1,7 +1,8 @@
 const httpStatus = require("http-status");
-const { userServices } = require("../services");
+const userService = require("./user.services");
+const tokenService = require("./token.services");
 const ApiError = require("../utils/ApiError");
-const User = require("../models/user.model");
+const { tokenTypes } = require("../config/tokens");
 
 /**
  *
@@ -10,7 +11,7 @@ const User = require("../models/user.model");
  * @returns {User}
  */
 const loginUserWithEmailAndPassword = async (email, password) => {
-    const user = await userServices.getUserByEmail(email);
+    const user = await userService.getUserByEmail(email);
     if (!user || !user.isPasswordMatch(password)) {
         throw new ApiError(
             httpStatus.UNAUTHORIZED,
@@ -20,6 +21,20 @@ const loginUserWithEmailAndPassword = async (email, password) => {
     return user;
 };
 
+const refreshAuth = async (oldRefreshToken) => {
+    const refreshTokenDoc = await tokenService.verifyToken(
+        oldRefreshToken,
+        tokenTypes.REFRESH
+    );
+    const user = await userService.getUserById(refreshTokenDoc.user);
+    if (!user) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Please authenticate");
+    }
+    await tokenService.blacklistToken(oldRefreshToken);
+    return await tokenService.generateAuthTokens(user);
+};
+
 module.exports = {
     loginUserWithEmailAndPassword,
+    refreshAuth,
 };

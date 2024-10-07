@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcryptjs");
+const crypto = require("node:crypto");
+const config = require("../config/config");
 const { tokenTypes } = require("../config/tokens");
 
 const tokenSchema = mongoose.Schema(
@@ -10,7 +11,7 @@ const tokenSchema = mongoose.Schema(
             required: true,
             index: true,
         },
-        userId: {
+        user: {
             type: mongoose.Schema.ObjectId,
             ref: "User",
             required: true,
@@ -39,7 +40,10 @@ const tokenSchema = mongoose.Schema(
 tokenSchema.pre("save", async function (next) {
     const token = this;
     if (token.isModified("token")) {
-        token.token = await bcrypt.hash(token.token, 10);
+        token.token = crypto
+            .createHash("sha256")
+            .update(token.token)
+            .digest("hex");
     }
     next();
 });
