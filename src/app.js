@@ -44,7 +44,7 @@ passport.use(passportJwtStrategy);
 
 if (config.env === "production") {
     app.use("/v1/auth", authLimiter);
-    app.use("/v1", slowLimit);
+    // app.use("/v1", slowLimit);
 }
 
 app.use("/v1", routes);

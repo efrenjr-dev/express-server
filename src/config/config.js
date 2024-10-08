@@ -24,6 +24,20 @@ const environmentVariablesSchema = Joi.object()
         REFRESH_TOKEN_SECRET: Joi.string()
             .required()
             .description("Refresh token JWT secret key"),
+        EMAIL_TOKEN_SECRET: Joi.string()
+            .required()
+            .description("Email Verification token JWT secret key"),
+        RESET_PASSWORD_TOKEN_SECRET: Joi.string()
+            .required()
+            .description("Reset Password token JWT secret key"),
+        EMAIL_EXPIRATION_MINUTES: Joi.number()
+            .required()
+            .description(
+                "Minutes after which Email Verification token expires"
+            ),
+        RESET_PASSWORD_EXPIRATION_MINUTES: Joi.number()
+            .required()
+            .description("Minutes after which Reset Password token expires"),
         ACCESS_EXPIRATION_MINUTES: Joi.number()
             .required()
             .description("Minutes after which Access Token expires"),
@@ -48,6 +62,13 @@ const environmentVariablesSchema = Joi.object()
         SLOW_DOWN_DELAY_MS: Joi.number()
             .required()
             .description("Milliseconds of request delay"),
+        SMTP_HOST: Joi.string().required().description("SMTP Host"),
+        SMTP_PORT: Joi.number().required().description("SMT Port to use"),
+        SMTP_USERNAME: Joi.string().required().description("SMTP Username"),
+        SMTP_PASSWORD: Joi.string().required().description("SMT password"),
+        EMAIL_FROM: Joi.string()
+            .required()
+            .description("Email that appears on From field"),
     })
     .prefs({ errors: { label: "key" } })
     .unknown();
@@ -74,6 +95,12 @@ module.exports = {
         refreshTokenSecret: environmentVariables.REFRESH_TOKEN_SECRET,
         accessExpirationMinutes: environmentVariables.ACCESS_EXPIRATION_MINUTES,
         refreshExpirationDays: environmentVariables.REFRESH_EXPIRATION_DAYS,
+        emailTokenSecret: environmentVariables.EMAIL_TOKEN_SECRET,
+        resetPasswordTokenSecret:
+            environmentVariables.RESET_PASSWORD_TOKEN_SECRET,
+        emailExpirationMinutes: environmentVariables.EMAIL_EXPIRATION_MINUTES,
+        resetPasswordExpirationMinutes:
+            environmentVariables.RESET_PASSWORD_EXPIRATION_MINUTES,
     },
     rateLimit: {
         windowMinutes: environmentVariables.RATE_LIMIT_WINDOW_MINUTES,
@@ -85,5 +112,16 @@ module.exports = {
         windowMinutes: environmentVariables.SLOW_DOWN_WINDOW_MINUTES,
         delayAfter: environmentVariables.SLOW_DOWN_DELAY_AFTER,
         delayMilliseconds: environmentVariables.SLOW_DOWN_DELAY_MS,
+    },
+    email: {
+        smtp: {
+            host: environmentVariables.SMTP_HOST,
+            port: environmentVariables.SMTP_PORT,
+            auth: {
+                user: environmentVariables.SMTP_USERNAME,
+                pass: environmentVariables.SMTP_PASSWORD,
+            },
+        },
+        from: environmentVariables.EMAIL_FROM,
     },
 };

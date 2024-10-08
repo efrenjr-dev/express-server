@@ -20,6 +20,12 @@ const generateToken = (userId, expirationClaim, type, secret = "") => {
     if (type === tokenTypes.REFRESH) {
         secret = config.jwt.refreshTokenSecret;
     }
+    if (type === tokenTypes.VERIFY_EMAIL) {
+        secret = config.jwt.emailTokenSecret;
+    }
+    if (type === tokenTypes.RESET_PASSWORD) {
+        secret = config.jwt.resetPasswordTokenSecret;
+    }
     const payload = {
         sub: userId,
         iat: moment().unix(),
@@ -29,6 +35,14 @@ const generateToken = (userId, expirationClaim, type, secret = "") => {
     return jwt.sign(payload, secret);
 };
 
+/**
+ *
+ * @param {string} token
+ * @param {ObjectId} userId
+ * @param {string} type
+ * @param {Date} expirationClaim
+ * @returns {Promise<Object>}
+ */
 const saveToken = async (token, userId, type, expirationClaim) => {
     const tokenDoc = await Token.create({
         token,
@@ -54,12 +68,26 @@ const blacklistToken = async (token) => {
     return tokenUpdate.acknowledged;
 };
 
+/**
+ *
+ * @param {string} token
+ * @param {string} type
+ * @param {string} secret
+ * @returns {Promise<Object>}
+ */
 const verifyToken = async (token, type, secret = "") => {
+    logger.debug("VERIFY TOKEN SERVICE");
     if (type === tokenTypes.ACCESS) {
         secret = config.jwt.accessTokenSecret;
     }
     if (type === tokenTypes.REFRESH) {
         secret = config.jwt.refreshTokenSecret;
+    }
+    if (type === tokenTypes.VERIFY_EMAIL) {
+        secret = config.jwt.emailTokenSecret;
+    }
+    if (type === tokenTypes.RESET_PASSWORD) {
+        secret = config.jwt.resetPasswordTokenSecret;
     }
     const payload = jwt.verify(token, secret);
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -108,4 +136,33 @@ const generateAuthTokens = async (user) => {
     };
 };
 
-module.exports = { generateAuthTokens, verifyToken, blacklistToken };
+/**
+ *
+ * @param {ObjectId} user
+ * @returns {Promise<string>}
+ */
+const generateEmailVerificationToken = async (user) => {
+    const emailVerificationExpiry = moment().add(
+        config.jwt.emailExpirationMinutes,
+        "minutes"
+    );
+    const emailVerificationToken = generateToken(
+        user.id,
+        emailVerificationExpiry,
+        tokenTypes.VERIFY_EMAIL
+    );
+    await saveToken(
+        emailVerificationToken,
+        user.id,
+        tokenTypes.VERIFY_EMAIL,
+        emailVerificationExpiry
+    );
+    return emailVerificationToken;
+};
+
+module.exports = {
+    generateAuthTokens,
+    verifyToken,
+    blacklistToken,
+    generateEmailVerificationToken,
+};

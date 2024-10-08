@@ -1,8 +1,15 @@
 const httpStatus = require("http-status");
 const logger = require("../config/logger");
-const { authService, tokenService, userService } = require("../services");
+const {
+    authService,
+    tokenService,
+    userService,
+    emailService,
+} = require("../services");
 const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
+const { tokenTypes } = require("../config/tokens");
+const { blacklistToken } = require("../services/token.services");
 
 const register = catchAsync(async (req, res) => {
     logger.debug("REGISTER USER");
@@ -14,10 +21,7 @@ const register = catchAsync(async (req, res) => {
 const login = catchAsync(async (req, res) => {
     logger.debug("LOGIN USER");
     const { email, password } = req.body;
-    const user = await authService.loginUserWithEmailAndPassword(
-        email,
-        password
-    );
+    const user = await authService.loginUser(email, password);
     const tokens = await tokenService.generateAuthTokens(user);
     res.status(httpStatus.OK).send({ user, tokens });
 });
@@ -29,4 +33,29 @@ const refreshTokens = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).send({ ...tokens });
 });
 
-module.exports = { register, login, refreshTokens };
+const sendVerificationEmail = catchAsync(async (req, res) => {
+    logger.debug("SEND VERIFICATION EMAIL");
+    const emailVerificationToken =
+        await tokenService.generateEmailVerificationToken(req.user);
+    await emailService.sendVerificationEmail(
+        req.user.email,
+        req.user.name,
+        emailVerificationToken
+    );
+    res.status(httpStatus.NO_CONTENT).send();
+});
+
+const verifyEmail = catchAsync(async (req, res) => {
+    logger.debug("VERIFY EMAIL");
+    logger.debug(`token: ${req.query.token}`);
+    await authService.verifyEmail(req.query.token);
+    res.status(httpStatus.ACCEPTED, "Email has been verified.").send();
+});
+
+module.exports = {
+    register,
+    login,
+    refreshTokens,
+    sendVerificationEmail,
+    verifyEmail,
+};
