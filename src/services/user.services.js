@@ -1,5 +1,4 @@
 const httpStatus = require("http-status");
-const logger = require("../config/logger");
 const User = require("../models/user.model");
 const ApiError = require("../utils/ApiError");
 

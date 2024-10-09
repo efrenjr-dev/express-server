@@ -6,10 +6,7 @@ const {
     userService,
     emailService,
 } = require("../services");
-const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
-const { tokenTypes } = require("../config/tokens");
-const { blacklistToken } = require("../services/token.services");
 
 const register = catchAsync(async (req, res) => {
     logger.debug("REGISTER USER");

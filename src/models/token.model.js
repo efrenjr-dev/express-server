@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 const crypto = require("node:crypto");
-const config = require("../config/config");
 const { tokenTypes } = require("../config/tokens");
 
 const tokenSchema = mongoose.Schema(

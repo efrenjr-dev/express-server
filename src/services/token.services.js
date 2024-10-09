@@ -2,7 +2,6 @@ const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const crypto = require("node:crypto");
 const config = require("../config/config");
-const logger = require("../config/logger");
 const { tokenTypes } = require("../config/tokens");
 const Token = require("../models/token.model");
 const { userService } = require("./user.services");
