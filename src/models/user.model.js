@@ -47,7 +47,7 @@ const userSchema = mongoose.Schema(
         },
         isActive: {
             type: Boolean,
-            default: false,
+            default: true,
         },
     },
     { timestamps: true }
@@ -71,7 +71,7 @@ userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
  */
 userSchema.methods.isPasswordMatch = async function (password) {
     const user = this;
-    return bcrypt.compare(password, user.password);
+    return await bcrypt.compare(password, user.password);
 };
 
 userSchema.pre("save", async function (next) {

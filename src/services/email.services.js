@@ -33,4 +33,12 @@ const sendVerificationEmail = async (to, name, token) => {
     await sendEmail(to, subject, text);
 };
 
-module.exports = { sendVerificationEmail };
+const sendResetPasswordEmail = async (to, token) => {
+    const subject = "Reset Password";
+    const link = `http://localhost:3000/v1/auth/reset-password?token=${token}`;
+    const text = `Dear,
+    To reset password for user ${to}, please click on the link ${link}`;
+    await sendEmail(to, subject, text);
+};
+
+module.exports = { sendVerificationEmail, sendResetPasswordEmail };

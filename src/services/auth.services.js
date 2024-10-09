@@ -15,10 +15,16 @@ const Token = require("../models/token.model");
  */
 const loginUser = async (email, password) => {
     const user = await userService.getUserByEmail(email);
-    if (!user || !user.isPasswordMatch(password)) {
+    if (!user || !(await user.isPasswordMatch(password))) {
         throw new ApiError(
             httpStatus.UNAUTHORIZED,
             "User email does exist or password is incorrect."
+        );
+    }
+    if (!user.isEmailVerified) {
+        throw new ApiError(
+            httpStatus.UNAUTHORIZED,
+            "Your email has not been verified"
         );
     }
     if (!user.isActive) {
@@ -48,9 +54,13 @@ const refreshAuth = async (oldRefreshToken) => {
     return await tokenService.generateAuthTokens(user);
 };
 
+/**
+ *
+ * @param {Object} token
+ */
 const verifyEmail = async (token) => {
     try {
-        logger.debug("VERIFY EMAIL SERVICE");
+        // logger.debug("VERIFY EMAIL SERVICE");
         const verifyEmailTokenDoc = await tokenService.verifyToken(
             token,
             tokenTypes.VERIFY_EMAIL
@@ -72,8 +82,32 @@ const verifyEmail = async (token) => {
     }
 };
 
+const resetPassword = async (token, newPassword) => {
+    try {
+        logger.debug("RESET PASSWORD SERVICE");
+        const resetPasswordTokenDoc = await tokenService.verifyToken(
+            token,
+            tokenTypes.RESET_PASSWORD
+        );
+        logger.debug(`resetPasswordTokenDoc: ${resetPasswordTokenDoc}`);
+        const user = await userService.getUserById(resetPasswordTokenDoc.user);
+        if (!user) {
+            throw new Error();
+        }
+        logger.debug(`user: ${user}`);
+        await userService.updateUser(user.id, { password: newPassword });
+        await Token.deleteMany({
+            user: user.id,
+            type: tokenTypes.RESET_PASSWORD,
+        });
+    } catch (error) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Failed to reset password");
+    }
+};
+
 module.exports = {
     loginUser,
     refreshAuth,
     verifyEmail,
+    resetPassword,
 };

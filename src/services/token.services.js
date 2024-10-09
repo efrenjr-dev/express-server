@@ -5,6 +5,7 @@ const config = require("../config/config");
 const logger = require("../config/logger");
 const { tokenTypes } = require("../config/tokens");
 const Token = require("../models/token.model");
+const { userService } = require("./user.services");
 
 /**
  *
@@ -76,7 +77,7 @@ const blacklistToken = async (token) => {
  * @returns {Promise<Object>}
  */
 const verifyToken = async (token, type, secret = "") => {
-    logger.debug("VERIFY TOKEN SERVICE");
+    // logger.debug("VERIFY TOKEN SERVICE");
     if (type === tokenTypes.ACCESS) {
         secret = config.jwt.accessTokenSecret;
     }
@@ -103,6 +104,11 @@ const verifyToken = async (token, type, secret = "") => {
     return tokenDoc;
 };
 
+/**
+ *
+ * @param {ObjectId} user
+ * @returns {Promise<Object>}
+ */
 const generateAuthTokens = async (user) => {
     const accessExpiry = moment().add(
         config.jwt.accessExpirationMinutes,
@@ -160,9 +166,30 @@ const generateEmailVerificationToken = async (user) => {
     return emailVerificationToken;
 };
 
+const generateResetPasswordToken = async (email) => {
+    const user = await userService.getUserByEmail(email);
+    const resetPasswordExpiry = moment().add(
+        config.jwt.resetPasswordExpirationMinutes,
+        "minutes"
+    );
+    const resetPasswordToken = generateToken(
+        user.id,
+        resetPasswordExpiry,
+        tokenTypes.RESET_PASSWORD
+    );
+    await saveToken(
+        resetPasswordToken,
+        user.id,
+        tokenTypes.RESET_PASSWORD,
+        resetPasswordExpiry
+    );
+    return resetPasswordToken;
+};
+
 module.exports = {
     generateAuthTokens,
     verifyToken,
     blacklistToken,
     generateEmailVerificationToken,
+    generateResetPasswordToken,
 };

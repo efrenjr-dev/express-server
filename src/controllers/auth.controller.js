@@ -33,6 +33,18 @@ const refreshTokens = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).send({ ...tokens });
 });
 
+const forgotPassword = catchAsync(async (req, res) => {
+    logger.debug("FORGOT PASSWORD");
+    const resetPasswordToken = await tokenService.generateResetPasswordToken(
+        req.body.email
+    );
+    await emailService.sendResetPasswordEmail(
+        req.body.email,
+        resetPasswordToken
+    );
+    res.status(httpStatus.NO_CONTENT).send();
+});
+
 const sendVerificationEmail = catchAsync(async (req, res) => {
     logger.debug("SEND VERIFICATION EMAIL");
     const emailVerificationToken =
@@ -47,9 +59,14 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 
 const verifyEmail = catchAsync(async (req, res) => {
     logger.debug("VERIFY EMAIL");
-    logger.debug(`token: ${req.query.token}`);
     await authService.verifyEmail(req.query.token);
     res.status(httpStatus.ACCEPTED, "Email has been verified.").send();
+});
+
+const resetPassword = catchAsync(async (req, res) => {
+    logger.debug("RESET PASSWORD");
+    await authService.resetPassword(req.query.token, req.body.password);
+    res.status(httpStatus.ACCEPTED, "Password has been reset.").send();
 });
 
 module.exports = {
@@ -58,4 +75,6 @@ module.exports = {
     refreshTokens,
     sendVerificationEmail,
     verifyEmail,
+    resetPassword,
+    forgotPassword,
 };
