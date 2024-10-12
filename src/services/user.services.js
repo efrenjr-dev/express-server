@@ -36,8 +36,18 @@ const getUserByEmail = async (email) => {
  *
  * @returns {Promise<User>}
  */
-const getAllUsers = async () => {
-    return User.find({});
+const getUsers = async (searchString, skip, take) => {
+    const or =
+        searchString !== undefined
+            ? {
+                  $or: [
+                      { email: { $regex: searchString, $options: "i" } },
+                      { id: { $regex: searchString, $options: "i" } },
+                  ],
+              }
+            : {};
+
+    return User.find({ ...or }, null, { skip, batchSize: take });
 };
 
 /**
@@ -66,6 +76,6 @@ module.exports = {
     createUser,
     getUserById,
     getUserByEmail,
-    getAllUsers,
+    getUsers,
     updateUser,
 };

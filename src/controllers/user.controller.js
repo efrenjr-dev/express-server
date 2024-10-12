@@ -19,9 +19,10 @@ const getUser = catchAsync(async (req, res) => {
     res.status(httpStatus.FOUND).send(user);
 });
 
-const getAllUsers = catchAsync(async (req, res) => {
+const getUsers = catchAsync(async (req, res) => {
     logger.debug("GET ALL USERS");
-    const users = await userService.getAllUsers();
+    const { searchString, skip, take } = req.query;
+    const users = await userService.getUsers(searchString, skip, take);
     if (!users) {
         throw new ApiError(httpStatus.NOT_FOUND, "No users found");
     }
@@ -40,4 +41,4 @@ const updateUser = catchAsync(async (req, res) => {
     res.status(httpStatus.ACCEPTED).send(user);
 });
 
-module.exports = { createUser, getUser, getAllUsers, updateUser };
+module.exports = { createUser, getUser, getUsers: getUsers, updateUser };
