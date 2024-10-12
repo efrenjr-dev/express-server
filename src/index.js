@@ -2,17 +2,12 @@ const app = require("./app");
 const mongoose = require("mongoose");
 const config = require("./config/config");
 const logger = require("./config/logger");
+const connectMongooseDb = require("./utils/mongoDb");
 
-let server;
+connectMongooseDb();
 
-mongoose.Promise = global.Promise;
-
-// Connect MongoDB at default port 27017.
-mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
-    logger.info(`Connected to MongoDB`);
-    server = app.listen(config.port, () => {
-        logger.info(`Listening to port ${config.port}`);
-    });
+const server = app.listen(config.port, () => {
+    logger.info(`Listening to port ${config.port}`);
 });
 
 const exitHandler = () => {
@@ -31,7 +26,6 @@ const unexpectedErrorHandler = (error) => {
 
 process.on("uncaughtException", unexpectedErrorHandler);
 process.on("unhandledRejection", unexpectedErrorHandler);
-
 process.on("SIGTERM", () => {
     logger.info("SIGTERM received");
     if (server) {
