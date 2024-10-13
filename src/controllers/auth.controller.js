@@ -57,13 +57,13 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 const verifyEmail = catchAsync(async (req, res) => {
     logger.debug("VERIFY EMAIL");
     await authService.verifyEmail(req.query.token);
-    res.status(httpStatus.ACCEPTED, "Email has been verified.").send();
+    res.status(httpStatus.ACCEPTED).send("Email has been verified.");
 });
 
 const resetPassword = catchAsync(async (req, res) => {
     logger.debug("RESET PASSWORD");
     await authService.resetPassword(req.query.token, req.body.password);
-    res.status(httpStatus.ACCEPTED, "Password has been reset.").send();
+    res.status(httpStatus.ACCEPTED).send("Password has been reset.");
 });
 
 module.exports = {

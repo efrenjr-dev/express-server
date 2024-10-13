@@ -10,12 +10,12 @@ datasource db {
 model Token {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   v           Int      @default(0) @map("__v") @ignore
-  blacklisted Boolean
-  createdAt   DateTime @db.Date
+  blacklisted Boolean  @default(false)
+  createdAt   DateTime @db.Date @default(now())
   expires     DateTime @db.Date
   token       String
   type        String
-  updatedAt   DateTime @db.Date
+  updatedAt   DateTime @db.Date @default(now())
   user        User @relation(fields: [userId],references: [id])
   userId     String @map("user") @db.ObjectId
 
@@ -26,14 +26,14 @@ model Token {
 model User {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   v               Int      @default(0) @map("__v") @ignore
-  createdAt       DateTime @db.Date
+  createdAt       DateTime @db.Date @default(now())
   email           String   @unique(map: "email_1")
-  isActive        Boolean
-  isEmailVerified Boolean
+  isActive        Boolean  @default(true)
+  isEmailVerified Boolean  @default(false)
   name            String
   password        String
-  role            String
-  updatedAt       DateTime @db.Date
+  role            String   @default("user")
+  updatedAt       DateTime @db.Date @default(now())
   tokens          Token[]
 	@@map("users")
 }

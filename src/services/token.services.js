@@ -1,10 +1,12 @@
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const crypto = require("node:crypto");
+const logger = require("../config/logger");
 const config = require("../config/config");
 const { tokenTypes } = require("../config/tokens");
 const Token = require("../models/token.model");
-const { userService } = require("./user.services");
+const userService = require("./user.services");
+const { xprisma, prisma } = require("../utils/prisma");
 
 /**
  *
@@ -44,28 +46,41 @@ const generateToken = (userId, expirationClaim, type, secret = "") => {
  * @returns {Promise<Object>}
  */
 const saveToken = async (token, userId, type, expirationClaim) => {
-    const tokenDoc = await Token.create({
-        token,
-        user: userId,
-        expires: expirationClaim.toDate(),
-        type,
+    // const tokenDoc = await Token.create({
+    //     token,
+    //     user: userId,
+    //     expires: expirationClaim.toDate(),
+    //     type,
+    // });
+
+    const tokenDoc = await xprisma.token.create({
+        data: {
+            token: token,
+            userId: userId,
+            expires: expirationClaim.toDate(),
+            type: type,
+        },
     });
     return tokenDoc;
 };
 
 const blacklistToken = async (token) => {
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const tokenUpdate = await Token.updateOne(
-        {
-            token: hashedToken,
-            blacklisted: false,
-        },
-        { $set: { blacklisted: true } }
-    );
-    if (!tokenUpdate.acknowledged) {
-        throw new Error("Token not updated");
-    }
-    return tokenUpdate.acknowledged;
+    // const tokenUpdate = await Token.updateOne(
+    //     {
+    //         token: hashedToken,
+    //         blacklisted: false,
+    //     },
+    //     { $set: { blacklisted: true } }
+    // );
+    // if (!tokenUpdate.acknowledged) {
+    //     throw new Error("Token not updated");
+    // }
+    const tokenUpdate = await xprisma.token.updateMany({
+        where: { token: hashedToken, blacklisted: false },
+        data: { blacklisted: true },
+    });
+    return !!tokenUpdate;
 };
 
 /**
@@ -76,7 +91,7 @@ const blacklistToken = async (token) => {
  * @returns {Promise<Object>}
  */
 const verifyToken = async (token, type, secret = "") => {
-    // logger.debug("VERIFY TOKEN SERVICE");
+    logger.debug("VERIFY TOKEN SERVICE");
     if (type === tokenTypes.ACCESS) {
         secret = config.jwt.accessTokenSecret;
     }
@@ -91,15 +106,24 @@ const verifyToken = async (token, type, secret = "") => {
     }
     const payload = jwt.verify(token, secret);
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const tokenDoc = await Token.findOne({
-        token: hashedToken,
-        user: payload.sub,
-        type: type,
-        blacklisted: false,
+    // const tokenDoc = await Token.findOne({
+    //     token: hashedToken,
+    //     user: payload.sub,
+    //     type: type,
+    //     blacklisted: false,
+    // });
+    const tokenDoc = await prisma.token.findFirstOrThrow({
+        where: {
+            token: hashedToken,
+            userId: payload.sub,
+            type: type,
+            blacklisted: false,
+        },
     });
-    if (!tokenDoc) {
-        throw new Error("Token not found");
-    }
+
+    // if (!tokenDoc) {
+    //     throw new Error("Token not found");
+    // }
     return tokenDoc;
 };
 
