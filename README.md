@@ -7,6 +7,21 @@ This repository has 2 branches corresponding to configurations (schema and queri
 
 The Express-Server provides many API tools that enable you to start user management, access, and authentication.
 
+## Features
+
+### Auth
+- User registration
+- User authentication (jsonwebtoken with Refresh Token rotation)
+- Password reset via email link
+- Verify email via email link
+
+### User
+- Get authenticated user information
+- User management (admin)
+  - Create user
+  - Get users with filter and pagination
+  - Update user
+
 ## **Getting started guide**
 
 Run development script
