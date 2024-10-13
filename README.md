@@ -1,4 +1,11 @@
-The Express-Server provides many API tools, and resources that enable you to start user management, access, and authentication.
+# Express Server
+
+This repository has 2 branches corresponding to configurations (schema and queries) on how the server connects to a MongoDB database.
+
+- **main** - Mongoose
+- **prisma** - Prisma Client
+
+The Express-Server provides many API tools that enable you to start user management, access, and authentication.
 
 ## **Getting started guide**
 
