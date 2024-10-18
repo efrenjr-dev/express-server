@@ -3,37 +3,32 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("SUPABASE_DATABASE_URL")
+  directUrl = env("SUPABASE_DIRECT_URL")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Token {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  v           Int      @default(0) @map("__v") @ignore
+  id          BigInt   @id @unique @default(autoincrement())
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  token       String   @unique
   blacklisted Boolean  @default(false)
-  createdAt   DateTime @db.Date @default(now())
-  expires     DateTime @db.Date
-  token       String
-  type        String
-  updatedAt   DateTime @db.Date @default(now())
-  user        User @relation(fields: [userId],references: [id])
-  userId     String @map("user") @db.ObjectId
-
-  @@index([token], map: "token_1")
-	@@map("tokens")
+  expires     DateTime @db.Timestamptz(6)
+  type        String   @db.VarChar
+  userId      BigInt
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model User {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  v               Int      @default(0) @map("__v") @ignore
-  createdAt       DateTime @db.Date @default(now())
-  email           String   @unique(map: "email_1")
+  id              BigInt   @id @unique @default(autoincrement())
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  email           String   @unique @db.VarChar
   isActive        Boolean  @default(true)
   isEmailVerified Boolean  @default(false)
-  name            String
+  name            String   @db.VarChar
   password        String
-  role            String   @default("user")
-  updatedAt       DateTime @db.Date @default(now())
-  tokens          Token[]
-	@@map("users")
+  role            String   @default("user") @db.VarChar
+  Token           Token[]
 }
