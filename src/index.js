@@ -1,10 +1,6 @@
 const app = require("./app");
-const mongoose = require("mongoose");
 const config = require("./config/config");
 const logger = require("./config/logger");
-const connectMongooseDb = require("./utils/mongoDb");
-
-connectMongooseDb();
 
 const server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);

@@ -1,5 +1,4 @@
 const httpStatus = require("http-status");
-const User = require("../models/user.model");
 const ApiError = require("../utils/ApiError");
 const { prisma, xprisma } = require("../utils/prisma");
 const logger = require("../config/logger");
@@ -10,12 +9,6 @@ const logger = require("../config/logger");
  * @returns {Promise<User>}
  */
 const createUser = async (userBody) => {
-    // if (await User.isEmailTaken(userBody.email)) {
-    //     throw new ApiError(httpStatus.BAD_REQUEST, "Email already exists");
-    // }
-
-    // return await User.create(userBody);
-
     if (await xprisma.user.isEmailTaken(userBody.email)) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Email already exists");
     }
@@ -34,7 +27,6 @@ const createUser = async (userBody) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-    // return User.findById(id);
     return await prisma.user.findUnique({ where: { id: id } });
 };
 
@@ -44,7 +36,6 @@ const getUserById = async (id) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = async (email) => {
-    // return User.findOne({ email });
     return await prisma.user.findUnique({ where: { email: email } });
 };
 
@@ -53,26 +44,11 @@ const getUserByEmail = async (email) => {
  * @returns {Promise<User>}
  */
 const getUsers = async (searchString, skip, take) => {
-    // const or =
-    //     searchString !== undefined
-    //         ? {
-    //               $or: [
-    //                   { email: { $regex: searchString, $options: "i" } },
-    //                   { id: { $regex: searchString, $options: "i" } },
-    //               ],
-    //           }
-    //         : {};
-
-    // return User.find({ ...or }, null, { skip, batchSize: take });
-
     return prisma.user.findMany({
         skip: parseInt(skip),
         take: parseInt(take),
         where: {
-            OR: [
-                { email: { contains: searchString } },
-                // { id: { contains: searchString } },
-            ],
+            OR: [{ email: { contains: searchString } }],
         },
         orderBy: {
             email: "asc",
@@ -87,19 +63,6 @@ const getUsers = async (searchString, skip, take) => {
  * @returns {Promise<User>}
  */
 const updateUser = async (userId, updateBody) => {
-    // const user = await getUserById(userId);
-    // if (!user) {
-    //     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-    // }
-    // if (
-    //     updateBody.email &&
-    //     (await user.isEmailTaken(updateBody.email, userId))
-    // ) {
-    //     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
-    // }
-    // Object.assign(user, updateBody);
-    // await user.save();
-    // return user;
     logger.debug(`updateBody.email ${updateBody.email}`);
     if (
         updateBody.email &&

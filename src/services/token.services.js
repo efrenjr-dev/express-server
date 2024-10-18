@@ -4,7 +4,6 @@ const crypto = require("node:crypto");
 const logger = require("../config/logger");
 const config = require("../config/config");
 const { tokenTypes } = require("../config/tokens");
-const Token = require("../models/token.model");
 const userService = require("./user.services");
 const { xprisma, prisma } = require("../utils/prisma");
 
@@ -46,13 +45,6 @@ const generateToken = (userId, expirationClaim, type, secret = "") => {
  * @returns {Promise<Object>}
  */
 const saveToken = async (token, userId, type, expirationClaim) => {
-    // const tokenDoc = await Token.create({
-    //     token,
-    //     user: userId,
-    //     expires: expirationClaim.toDate(),
-    //     type,
-    // });
-
     const tokenDoc = await xprisma.token.create({
         data: {
             token: token,
@@ -66,16 +58,6 @@ const saveToken = async (token, userId, type, expirationClaim) => {
 
 const blacklistToken = async (token) => {
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    // const tokenUpdate = await Token.updateOne(
-    //     {
-    //         token: hashedToken,
-    //         blacklisted: false,
-    //     },
-    //     { $set: { blacklisted: true } }
-    // );
-    // if (!tokenUpdate.acknowledged) {
-    //     throw new Error("Token not updated");
-    // }
     const tokenUpdate = await xprisma.token.updateMany({
         where: { token: hashedToken, blacklisted: false },
         data: { blacklisted: true },
@@ -106,12 +88,7 @@ const verifyToken = async (token, type, secret = "") => {
     }
     const payload = jwt.verify(token, secret);
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    // const tokenDoc = await Token.findOne({
-    //     token: hashedToken,
-    //     user: payload.sub,
-    //     type: type,
-    //     blacklisted: false,
-    // });
+
     const tokenDoc = await prisma.token.findFirstOrThrow({
         where: {
             token: hashedToken,
@@ -121,9 +98,6 @@ const verifyToken = async (token, type, secret = "") => {
         },
     });
 
-    // if (!tokenDoc) {
-    //     throw new Error("Token not found");
-    // }
     return tokenDoc;
 };
 
@@ -151,8 +125,6 @@ const generateAuthTokens = async (user) => {
 
     await saveToken(refreshToken, user.id, tokenTypes.REFRESH, refreshExpiry);
 
-    // logger.debug(`ACCESS TOKEN: ${accessToken}`);
-    // logger.debug(`REFRESH TOKEN: ${refreshToken}`);
     return {
         access: {
             token: accessToken,

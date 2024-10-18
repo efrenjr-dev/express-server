@@ -1,6 +1,6 @@
 const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
 const config = require("./config");
-const User = require("../models/user.model");
+const { prisma } = require("../utils/prisma");
 
 const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("Bearer"),
@@ -8,7 +8,8 @@ const jwtOptions = {
 };
 
 const verifyJwt = (jwt_payload, done) => {
-    User.findById(jwt_payload.sub)
+    prisma.user
+        .findUnique({ where: { id: jwt_payload.sub } })
         .then((user) => {
             if (!user) {
                 return done(null, false);

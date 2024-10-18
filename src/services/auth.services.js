@@ -5,8 +5,6 @@ const userService = require("./user.services");
 const tokenService = require("./token.services");
 const ApiError = require("../utils/ApiError");
 const { tokenTypes } = require("../config/tokens");
-const User = require("../models/user.model");
-const Token = require("../models/token.model");
 const { prisma } = require("../utils/prisma");
 const emailService = require("./email.services");
 
@@ -18,7 +16,6 @@ const emailService = require("./email.services");
  */
 const loginUser = async (email, password) => {
     const user = await userService.getUserByEmail(email);
-    // if (!user || !(await user.isPasswordMatch(password))) {
     const isPasswordMatch = await bcrypt.compare(user.password, password);
     if (!user || isPasswordMatch) {
         throw new ApiError(
@@ -59,7 +56,6 @@ const refreshAuth = async (oldRefreshToken) => {
         oldRefreshToken,
         tokenTypes.REFRESH
     );
-    // const user = await userService.getUserById(refreshTokenDoc.user);
     const user = await userService.getUserById(refreshTokenDoc.userId);
     if (!user) {
         throw new ApiError(httpStatus.UNAUTHORIZED, "Please authenticate");
@@ -73,8 +69,6 @@ const refreshAuth = async (oldRefreshToken) => {
  * @param {Object} token
  */
 const verifyEmail = async (token) => {
-    // try {
-    // logger.debug("VERIFY EMAIL SERVICE");
     const verifyEmailTokenDoc = await tokenService.verifyToken(
         token,
         tokenTypes.VERIFY_EMAIL
@@ -83,44 +77,26 @@ const verifyEmail = async (token) => {
     if (!user) {
         throw new Error();
     }
-    // await Token.deleteMany({
-    //     user: user.id,
-    //     type: tokenTypes.VERIFY_EMAIL,
-    // });
     await prisma.token.deleteMany({
         where: { userId: user.id, type: tokenTypes.VERIFY_EMAIL },
     });
     await userService.updateUser(user.id, { isEmailVerified: true });
-    // } catch (error) {
-    //     throw new ApiError(
-    //         httpStatus.UNAUTHORIZED,
-    //         "Email verification failed"
-    //     );
-    // }
 };
 
 const resetPassword = async (token, newPassword) => {
-    // try {
-    // logger.debug("RESET PASSWORD SERVICE");
     const resetPasswordTokenDoc = await tokenService.verifyToken(
         token,
         tokenTypes.RESET_PASSWORD
     );
-    // logger.debug(`resetPasswordTokenDoc: ${resetPasswordTokenDoc}`);
-    // const user = await userService.getUserById(resetPasswordTokenDoc.user);
     const user = await userService.getUserById(resetPasswordTokenDoc.userId);
     if (!user) {
         throw new Error();
     }
-    // logger.debug(`user: ${user}`);
     await userService.updateUser(user.id, { password: newPassword });
     await Token.deleteMany({
         user: user.id,
         type: tokenTypes.RESET_PASSWORD,
     });
-    // } catch (error) {
-    //     throw new ApiError(httpStatus.UNAUTHORIZED, "Failed to reset password");
-    // }
 };
 
 module.exports = {
