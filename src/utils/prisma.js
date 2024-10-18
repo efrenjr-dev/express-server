@@ -48,6 +48,15 @@ const myExtension = Prisma.defineExtension({
     },
 });
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    omit: {
+        user: {
+            pk: true,
+        },
+        token: {
+            id: true,
+        },
+    },
+});
 const xprisma = prisma.$extends(myExtension);
 module.exports = { prisma, xprisma };
