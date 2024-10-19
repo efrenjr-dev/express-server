@@ -43,6 +43,7 @@ const loginUser = async (email, password) => {
             "Your email has not been verified. Please check your email."
         );
     }
+    delete user.password;
     return user;
 };
 

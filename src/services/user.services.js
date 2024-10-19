@@ -18,6 +18,9 @@ const createUser = async (userBody) => {
             email: userBody.email,
             password: userBody.password,
         },
+        omit: {
+            password: true,
+        },
     });
 };
 
@@ -48,10 +51,16 @@ const getUsers = async (searchString, skip, take) => {
         skip: parseInt(skip),
         take: parseInt(take),
         where: {
-            OR: [{ email: { contains: searchString } }],
+            OR: [
+                { email: { contains: searchString } },
+                { name: { contains: searchString } },
+            ],
         },
         orderBy: {
             email: "asc",
+        },
+        omit: {
+            password: true,
         },
     });
 };
@@ -74,6 +83,9 @@ const updateUser = async (userId, updateBody) => {
     const updatedUser = await xprisma.user.update({
         where: { id: userId },
         data: updateBody,
+        omit: {
+            password: true,
+        },
     });
 
     return updatedUser;

@@ -13,6 +13,7 @@ const createUser = catchAsync(async (req, res, next) => {
 const getUser = catchAsync(async (req, res) => {
     logger.debug("GET USER");
     const user = await userService.getUserById(req.params.userId);
+    delete user.password;
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
