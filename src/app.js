@@ -8,6 +8,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
+const superjson = require("superjson");
 
 const ApiError = require("./utils/ApiError");
 const { errorConverter, errorHandler } = require("./middlewares/error");
@@ -46,6 +47,25 @@ if (config.env === "production") {
     app.use("/v1/auth", authLimiter);
     // app.use("/v1", slowLimit);
 }
+
+// Middleware to parse incoming JSON with SuperJSON
+app.use(
+    express.json({
+        reviver: (key, value) => superjson.parse(value),
+    })
+);
+
+// Middleware to serialize outgoing JSON with SuperJSON
+app.use((req, res, next) => {
+    const originalSend = res.send;
+    res.send = function (body) {
+        if (typeof body === "object") {
+            body = superjson.stringify(body);
+        }
+        return originalSend.call(this, body);
+    };
+    next();
+});
 
 app.use("/v1", routes);
 
