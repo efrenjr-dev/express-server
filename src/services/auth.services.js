@@ -93,9 +93,11 @@ const resetPassword = async (token, newPassword) => {
         throw new Error();
     }
     await userService.updateUser(user.id, { password: newPassword });
-    await Token.deleteMany({
-        user: user.id,
-        type: tokenTypes.RESET_PASSWORD,
+    await prisma.token.deleteMany({
+        where: {
+            userId: user.id,
+            type: tokenTypes.RESET_PASSWORD,
+        },
     });
 };
 
