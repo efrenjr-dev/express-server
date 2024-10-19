@@ -4,6 +4,7 @@ This repository has 2 branches corresponding to configurations (schema and queri
 
 - **main** - Mongoose
 - **prisma** - Prisma Client
+- **prisma-supabase** - Prisma Client with Supabase DB
 
 The Express-Server provides many API tools that enable you to start user management, access, and authentication.
 
