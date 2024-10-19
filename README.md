@@ -1,1 +1,1 @@
-# Prisma Client Configuration 
+# Prisma Client Configuration with Supabase Relational DB Connection
